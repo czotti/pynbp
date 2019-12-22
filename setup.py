@@ -4,10 +4,9 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
-
 setuptools.setup(
     name="pynbp",
-    version="0.0.9",
+    version="0.0.10",
     author="Terry Kolody",
     author_email="tekolody@gmail.com",
     description="Python implementation of the HP Tuners Track Addict Numeric Broadcast Protocol (V1.0)",
@@ -22,6 +21,6 @@ setuptools.setup(
     ],
     python_requires='>=3',
     install_requires=[
-       'pyserial',
+        'pyserial',
     ]
 )
