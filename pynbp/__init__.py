@@ -16,7 +16,7 @@ import socket
 
 import serial
 
-__version__ = "0.0.9"
+__version__ = "0.0.10"
 HOME = str(Path.home())
 
 NbpKPI = namedtuple("NbpKPI", "name, unit, value")
@@ -126,18 +126,7 @@ class PyNBP(BasePyNBP):
 
                 if time.time() - self.last_update_time < self.min_update_interval:
                     continue
-                # if nbppayload.packettype == 'UPDATE':
-                #     nbppacket = self._genpacket(
-                #         ptype=nbppayload.packettype)
-                # elif nbppayload.packettype == 'ALL':
-                #     nbppacket = self._genpacket(
-                #         ptype=nbppayload.packettype)
-                # elif nbppayload.packettype == 'METADATA':
-                #     nbppacket = self.metadata()
-                # else:
-                #     logging.info(
-                #         'Invalid packet type {}.'.format(
-                #             nbppayload.packettype))
+
                 nbppacket = self._genpacket(nbppayload.packettype)
 
                 LOGGER.warning(nbppacket.decode())
@@ -188,10 +177,11 @@ class WifiPyNBP(BasePyNBP):
             if not connected:
                 try:
                     conn, client_address = sock.accept()
+                    conn.setblocking(0)
                     connected = True
                     logging.warning(
                         "Connection from {0} open".format(client_address))
-                except InterruptedError as _:
+                except socket.timeout as _:
                     logging.info(
                         "Socket conection not open - waiting for connection")
 
@@ -205,22 +195,14 @@ class WifiPyNBP(BasePyNBP):
                     if text == "!ALL":
                         logging.warning("ALL Packet Requested. Sending")
                         conn.sendall(self._genpacket('ALL'))
+            except BlockingIOError as _:
+                # nothing received from the client to send 'ALL'
+                pass
+            try:
 
                 if time.time() - self.last_update_time < self.min_update_interval:
                     continue
 
-                # if nbppayload.packettype == 'UPDATE':
-                #     nbppacket = self._genpacket(
-                #         ptype=nbppayload.packettype)
-                # elif nbppayload.packettype == 'ALL':
-                #     nbppacket = self._genpacket(
-                #         ptype=nbppayload.packettype)
-                # elif nbppayload.packettype == 'METADATA':
-                #     nbppacket = self.metadata()
-                # else:
-                #     logging.info(
-                #         'Invalid packet type {0}.'.format(
-                #             nbppayload.packettype))
                 nbppacket = self._genpacket(nbppayload.packettype)
 
                 LOGGER.warning(nbppacket.decode())
